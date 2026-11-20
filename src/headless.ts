@@ -22,7 +22,7 @@ function scenario(x:unknown,night:number):Scenario {
     optional(x.player,'pos',pos)
     optional(x.player,'vel',pos)
     optional(x.player,'grounded',v=>typeof v==='boolean')
-    for(const key of ['flames','carried','invuln_ticks','dash_cd_ticks','pulse_cd_ticks','charm_ticks']) optional(x.player,key,nat)
+    for(const key of ['flames','carried','invuln_ticks','dash_cd_ticks','pulse_cd_ticks','charm_ticks','successful_lights']) optional(x.player,key,nat)
   }
   optional(x,'motes',v=>Array.isArray(v) && v.every(pos))
   for(const key of ['shades','lanterns','drifters','charms']){
@@ -34,9 +34,10 @@ function scenario(x:unknown,night:number):Scenario {
       check(dict(item),key+' sai định dạng')
       if(key==='shades'||key==='drifters') {
         check(pos(item.pos),key+'.pos sai định dạng')
-        const states=key==='shades'?['spawning','wander','chase','recoil','stunned']:['idle','chase','flee']
+        const states=key==='shades'?['spawning','wander','chase','recoil','stunned','drain']:['idle','chase','flee']
         optional(item,'state',v=>typeof v==='string' && states.includes(v))
         optional(item,'state_ticks_left',nat)
+        if(key==='shades')optional(item,'target_lantern_id',v=>typeof v==='string' && /^L[1-7]$/.test(v))
         if(key==='drifters') optional(item,'stolen',nat)
       } else if(key==='charms'){
         check(typeof item.id==='string','Thiếu ID bùa')
@@ -49,6 +50,8 @@ function scenario(x:unknown,night:number):Scenario {
         optional(item,'pos',pos)
         optional(item,'lit',v=>typeof v==='boolean')
         optional(item,'deposited',nat)
+        optional(item,'fuel',v=>num(v)&&v>=0&&v<=100)
+        optional(item,'ever_lit',v=>typeof v==='boolean')
       }
       if('id' in item){
         check(typeof item.id==='string' && item.id.length && !ids.has(item.id),'ID thiếu hoặc trùng')

@@ -32,3 +32,16 @@
 - **Trình duyệt** — Edge 145, Intel HD Graphics 630, 1280×720: 59,87 / 59,99 / 59,99 FPS trung bình, đo mỗi Đêm trong 8 giây sau khởi động. Bài thử UI kiểm tra lưu cài đặt, di chuột không giữ nút, pause, audio, HUD và tổng điểm. Bài thử UI dùng tình huống gần thắng/thua để chuyển màn; các lượt headless phía trên dùng bản đồ mặc định. Ảnh và video có âm thanh trong evidence/cp2-browser.
 - **Giới hạn** — Chưa có kết quả test ẩn từ giảng viên. FPS trên các thiết bị khác cần đo trên thiết bị đó.
 - **Clone sạch** — Tại commit mã nguồn 7753c22, npm ci, npm run build và npm test đều thành công trên Windows. CLI chạy trọn Đêm 3 trong 1,097 giây ở lần này. Bundle production có SHA-256 94a0264d3afee64e3d99303acac1ca1c23ee8c397b2fc72e0ff75e8c8e9b5fc9, trùng với bản đo FPS. Bài thử trình duyệt cũng phát hiện và kiểm tra lại lỗi nhấn P liên tiếp và dấu tiếng Việt ở tiêu đề.
+
+### Góp ý sau Phase 2
+
+- Bóng Mực chạy chậm; Mây chạy chậm; quãng lướt ngắn. Ba giá trị đang theo số chuẩn của Ticket-02, cần đối chiếu Ticket-03 trước khi điều chỉnh.
+- Người chơi muốn xoay góc nhìn lên và xuống bằng chuột. Đây là yêu cầu điều khiển cho Phase 3.
+
+## CP3 · Đèn cạn dầu
+
+TICKET-03.md thay luật thắng sớm bằng sống tới bình minh, thêm nhiên liệu, hút dầu, sức chứa tăng dần, điểm mới và chế độ màu dễ phân biệt. Ba góp ý tốc độ của người chơi vẫn đối chiếu theo số chuẩn Ticket-02 vì Ticket-03 không thay tốc độ. Điều khiển POV lên xuống có thể bổ sung ở UI. Đã triển khai Contract v1.2. Xem ADR-03.md, CHANGELOG-03.md và evidence/phase3.
+
+- **Test cũ được sửa** — Trong tests/contract.mjs, kỳ vọng đèn sáng không nhận tương tác đổi thành châm dầu; bài thắng all_lit đổi thành dawn_survived; điểm được tính theo lượt nạp và dầu. Trong tests/phase2.mjs, thời lượng ba Đêm, thắng ở tick cuối và phép đo đủ 21600 tick được cập nhật. tests/night1.mjs và tests/campaign.mjs là trình tạo lộ trình thắng sớm theo luật CP2; chúng được giữ trong lịch sử/tag phase-2 và ngừng chạy trong npm test CP3 vì mục tiêu đã thay thế.
+- **Kiểm chứng CP3** — npm run build thành công. npm test đạt 8 nhóm hồi quy contract, 10 nhóm Phase 2 còn hiệu lực và 3 nhóm CP3. Headless Đêm 3 chạy đủ 21600 tick trong dưới 1 giây ở lần đo trong test. Scenario bình minh trong evidence/phase3/dawn-scenario.json thắng ở tick 3, điểm 477. Edge 1280×720 mở bản production, lưu cài đặt màu sau reload và không phát sinh lỗi JavaScript; ảnh trong evidence/phase3/night-1.jpg.
+- **Giới hạn** — Chưa có kết quả test ẩn của giảng viên. Các lượt thắng từ đầu ba Đêm bằng bot của CP2 không còn là phép thử hợp lệ cho luật bình minh mới. Chưa có phép đo FPS CP3 riêng trên mọi đảo.

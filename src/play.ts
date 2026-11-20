@@ -41,6 +41,8 @@ let night = 1
 let scores:number[] = []
 let game = new Game(contract.tuning, Date.now(), {}, night)
 let yaw = 0
+let pitch = 0
+let accessibleColors = preference('accessible-colors',0,0,1)===1
 let previousTime = 0
 let accumulator = 0
 let captured = false
@@ -171,7 +173,9 @@ function settings() {
   <label for="volume">Âm lượng <output id="volume-label">${volume}%</output></label>
   <input id="volume" type="range" min="0" max="100" value="${volume}">
   <label for="sensitivity">Độ nhạy chuột <output id="sensitivity-label">${sensitivity.toFixed(2)}×</output></label>
-  <input id="sensitivity" type="range" min=".25" max="2" step=".05" value="${sensitivity}">`,button('back','Quay lại',true))
+  <input id="sensitivity" type="range" min=".25" max="2" step=".05" value="${sensitivity}">
+  <label for="accessible-colors">Bảng màu dễ phân biệt</label>
+  <input id="accessible-colors" type="checkbox" ${accessibleColors?'checked':''}>`,button('back','Quay lại',true))
 }
 function back() {
   if(settingsReturn === 'menu') {menu(); return}
@@ -233,6 +237,9 @@ panel.addEventListener('input',e=>{
     sensitivity = input.valueAsNumber
     element('sensitivity-label').textContent=sensitivity.toFixed(2)+'×'
     save('sensitivity',sensitivity)
+  } else if(input.id==='accessible-colors') {
+    accessibleColors=input.checked
+    save('accessible-colors',Number(accessibleColors))
   }
 })
 dialog.addEventListener('cancel',e=>{e.preventDefault()})
@@ -264,7 +271,10 @@ document.addEventListener('pointerlockchange',()=>{
 })
 view.canvas.addEventListener('click',()=>{if(page==='play') requestMouse()})
 document.addEventListener('mousemove',e=>{
-  if(page==='play' && (captured || e.target === view.canvas)) yaw-=e.movementX*.23*sensitivity
+  if(page==='play' && (captured || e.target === view.canvas)){
+    yaw-=e.movementX*.23*sensitivity
+    pitch=Math.max(-.65,Math.min(.85,pitch-e.movementY*.003*sensitivity))
+  }
 })
 
 const setText = (node:HTMLElement,value:string) => {if(node.textContent!==value) node.textContent=value}
@@ -277,10 +287,12 @@ function renderHud() {
   setText(nodes.flames,String(game.player.flames)+' / '+game.t.flames)
   setText(nodes.lit,game.lanterns.filter(l=>l.lit).length+' / '+game.lanterns.length)
   setText(nodes.score,String(game.score))
-  setText(nodes['bag-count'],'Đom đóm '+game.player.carried+' / '+game.t.carry_capacity)
+  setText(nodes['bag-count'],'Đom đóm '+game.player.carried+' / '+game.capacity)
+  while(bag.children.length<game.capacity)bag.append(document.createElement('i'))
+  while(bag.children.length>game.capacity)bag.lastElementChild?.remove()
   for(let i=0; i<bag.children.length; i++) bag.children[i].classList.toggle('filled',i<game.player.carried)
   const lantern=game.nearest()
-  setText(nodes.hint,lantern?'E — Nạp ánh sáng ('+lantern.deposited+'/'+game.t.lantern_cost+')':'')
+  setText(nodes.hint,lantern?(lantern.lit?'E — Châm dầu ('+(lantern.fuelUnits/60).toFixed(1)+'/100)':'E — Nạp ánh sáng ('+lantern.deposited+'/'+(lantern.ever_lit?game.t.relight_cost:game.t.lantern_cost)+')'):'')
   setText(nodes.charm,game.charmTicks>0?'Bùa Gió · '+Math.ceil(game.charmTicks/60)+' s':'')
   setText(nodes['dash-status'],game.dashCd>0?(game.dashCd/60).toFixed(1)+' s':'Sẵn sàng')
   setText(nodes['pulse-status'],game.pulseCd>0?(game.pulseCd/60).toFixed(1)+' s':'Sẵn sàng')
@@ -328,7 +340,8 @@ function draw(now:number) {
     }
     accumulator-=1/60
   }
-  view.draw(game,yaw)
+  document.body.classList.toggle('accessible-colors',accessibleColors)
+  view.draw(game,yaw,pitch,accessibleColors)
   if(!hud.hidden) renderHud()
   requestAnimationFrame(draw)
 }

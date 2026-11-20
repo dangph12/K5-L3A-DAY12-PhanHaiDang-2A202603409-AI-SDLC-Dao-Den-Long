@@ -13,6 +13,9 @@ const unlit=(color)=>new T.MeshBasicMaterial({color})
 const mats=Object.fromEntries(Object.entries(colors).map(([name,c])=>[name,ground(c)]))
 const core=unlit(colors.core), firefly=unlit(colors.mote), gilding=unlit(colors.gold)
 const inkEdge=new T.MeshBasicMaterial({color:colors.rim,side:T.BackSide})
+const inkEdgeAccessible=new T.MeshBasicMaterial({color:0x00b3ff,side:T.BackSide})
+const inkEyes=new T.MeshBasicMaterial({color:colors.rim})
+const inkEyesAccessible=new T.MeshBasicMaterial({color:0x00b3ff})
 const haloMaterial=new T.MeshBasicMaterial({color:colors.halo,transparent:true,opacity:.17,depthWrite:false})
 const paper=unlit(colors.lit),lightless=ground(colors.off)
 const sphere=new T.SphereGeometry(1,20,14)
@@ -183,6 +186,9 @@ function beacon(){
   part(root,rod,stone,[0,.13,0],[.76,.26,.76])
   const glass=part(root,sphere,lightless,[0,2.82,0],[.57,.75,.57])
   const center=part(root,sphere,core,[0,2.82,0],[.23,.56,.23])
+  const fuelBack=part(root,plank,mats.ink,[.68,2.77,0],[.10,1,.10])
+  const fuelBar=part(root,plank,mats.gold,[.68,2.77,0],[.12,1,.12])
+  const tear=part(root,cone,mats.ink,[.28,2.66,.42],[.16,.34,.05])
   for(let i=0;i<6;i++){
     const a=i*tau/6
     part(root,rod,mats.wood,[.49*Math.cos(a),2.82,.49*Math.sin(a)],[.026,1.03,.026])
@@ -194,7 +200,7 @@ function beacon(){
     color:colors.lit,transparent:true,opacity:.09,depthWrite:false
   }),[0,.025,0],[6,6,6])
   pool.rotation.x=-Math.PI/2
-  return {root,glass,center,pool}
+  return {root,glass,center,pool,fuelBack,fuelBar,tear}
 }
 
 function makeShade(){
@@ -202,8 +208,10 @@ function makeShade(){
   const shell=part(root,sphere,inkEdge,[0,0,0],[.60,.68,.54])
   const body=part(root,sphere,mats.ink,[0,0,0],[.58,.66,.52])
   root.userData.body=body
+  root.userData.rim=shell
+  root.userData.eyes=[]
   for(const side of [-1,1]){
-    part(root,sphere,gilding,[side*.17,.08,.47],[.061,.058,.035])
+    root.userData.eyes.push(part(root,sphere,inkEyes,[side*.17,.08,.47],[.061,.058,.035]))
     part(root,cone,mats.ink,[side*.30,-.46,.04],[.18,.49,.18]).rotation.z=Math.PI+side*.27
   }
   shell.renderOrder=-1
@@ -303,7 +311,7 @@ export function createView(host){
       if(local.z>=0) return Math.atan2(local.x,-Math.max(.001,Math.abs(local.z)))*180/Math.PI
       return Math.atan2(projected.x*camera.aspect,projected.y)*180/Math.PI
     },
-    draw(game,yaw){
+    draw(game,yaw,pitch=0,colorblind=false){
       if(night!==game.night){
         if(terrain){scene.remove(terrain);terrain.userData.dispose()}
         night=game.night
@@ -320,14 +328,24 @@ export function createView(host){
       const floor=mapFor(night).ground(x,z)
       shadow.visible=Number.isFinite(floor) && y>=floor-.01
       if(shadow.visible) shadow.position.set(x,floor+.024,z)
-      camera.position.set(x+Math.sin(a)*10,y+6.8,z+Math.cos(a)*10)
+      camera.position.set(x+Math.sin(a)*10*Math.cos(pitch),y+6.8+10*Math.sin(pitch),z+Math.cos(a)*10*Math.cos(pitch))
       camera.lookAt(x,y+1.05,z)
       for(const [i,l] of game.lanterns.entries()){
         if(!posts[i]){posts[i]=beacon();scene.add(posts[i].root)}
-        const {root,glass,center,pool}=posts[i]
+        const {root,glass,center,pool,fuelBack,fuelBar,tear}=posts[i]
         root.visible=true
         root.position.set(...l.pos)
         glass.material=l.lit?paper:lightless
+        glass.scale.y=l.lit?1:.8
+        glass.rotation.z=l.lit?0:.12
+        tear.visible=!l.lit
+        const fill=l.fuelUnits/(game.t.fuel_max*60)
+        center.scale.y=l.lit?Math.max(.08,fill):1
+        fuelBack.visible=l.lit
+        fuelBar.visible=l.lit && (fill>=.3 || Math.floor(ticks/30)%2===0)
+        fuelBar.scale.y=Math.max(.01,fill)
+        fuelBar.position.y=2.27+fill*.5
+        glass.visible=!l.lit || fill>=.3 || Math.floor(ticks/30)%2===0
         center.visible=pool.visible=l.lit
       }
       for(let i=game.lanterns.length;i<posts.length;i++) posts[i].root.visible=false
@@ -340,6 +358,8 @@ export function createView(host){
         o.position.y+=.1*Math.sin(ticks/13)
         o.rotation.y=Math.atan2(x-o.position.x,z-o.position.z)
         o.userData.body.material=e.state==='stunned'?mats.stun:mats.ink
+        o.userData.rim.material=colorblind?inkEdgeAccessible:inkEdge
+        for(const eye of o.userData.eyes)eye.material=colorblind?inkEyesAccessible:inkEyes
       })
       sync(game.drifters,driftermap,makeDrifter,(o,e)=>{
         o.position.y+=.55

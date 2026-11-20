@@ -49,10 +49,11 @@ if (resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     const scenario={...quiet,player:{carried:9},motes:[[1,0,0],[0,0,0],[1.001,0,0],[0,1.501,0]],
       lanterns:[{id:'L1',pos:[2,0,0],deposited:9},{id:'L2',pos:[-2,0,0]}]}
     const rows=run(1,scenario,[{tick:0,interact:true},{tick:2,interact:false},{tick:3,interact:true}],4)
-    assert.deepEqual(events(rows,'deposit').map(e=>[e.tick,e.data.lantern_id,e.data.amount]),[[1,'L1',1],[4,'L2',10]])
+    assert.deepEqual(events(rows,'deposit').map(e=>[e.tick,e.data.lantern_id,e.data.amount]),[[1,'L1',1]])
+    assert.equal(events(rows,'refuel').length,1)
     assert.equal(events(rows,'mote_picked').length,2)
     assert.equal(snapshots(rows).at(-1).motes_active,2)
-    assert.equal(rows.at(-1).score,310)
+    assert.equal(rows.at(-1).score,110)
     const partial=run(1,{...quiet,player:{carried:2},lanterns:[{id:'L1',pos:[0,0,0]}]},[{tick:0,interact:true}])
     assert.equal(events(partial,'deposit')[0].data.deposited,2)
     assert.equal(events(partial,'lantern_lit').length,0)
@@ -89,19 +90,18 @@ if (resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     assert.equal(events(safe,'player_hit').length,0)
     assert.ok(snapshots(safe)[30].shades[0].pos[0]>=5.999)
   })
-  test('win, scoring, setup without scoring and dawn',()=>{
-    const scenario=JSON.parse(readFileSync('tests/win.json'))
-    const inputs=JSON.parse(readFileSync('tests/interact.json'))
-    const rows=run(1,scenario,inputs.frames,60)
+  test('setup without scoring and dawn threshold',()=>{
+    const scenario={...quiet,time_left_s:1/60,lanterns:[{id:'L1',lit:true},{id:'L2',lit:true},{id:'L3',lit:true}]}
+    const rows=run(1,scenario,[],1)
     assert.equal(snapshots(rows)[0].score,0)
-    assert.deepEqual(rows.at(-1),{type:'end',ticks:1,state:'won',score:948})
-    assert.deepEqual(events(rows,'game_over')[0].data,{result:'won',reason:'all_lit'})
+    assert.deepEqual(events(rows,'game_over')[0].data,{result:'won',reason:'dawn_survived'})
+    assert.equal(rows.at(-1).score,597)
     const dawn=run(1,{...quiet,time_left_s:.05},[],60)
     assert.equal(events(dawn,'game_over')[0].data.reason,'dawn')
     assert.equal(dawn.at(-1).ticks,3)
   })
   test('deterministic bytes and stable generated IDs',()=>{
-    const scenario={lanterns:[{id:'L1',lit:true,pos:[0,0,0]}]}
+    const scenario={lanterns:[{id:'L1',lit:true,pos:[0,0,0]}],time_left_s:30}
     run(1,scenario,[],1210,100)
     const a=readFileSync(out)
     const rows=run(1,scenario,[],1210,100)

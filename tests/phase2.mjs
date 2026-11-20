@@ -11,7 +11,7 @@ test('three maps, initial contract and spawn schedules',()=>{
     const rows=run(night,{wind_enabled:false,lanterns:[{id:'L1',pos:night===3?[0,0,-26]:[0,0,0],lit:true}]},[],1200,240)
     const start=snapshots(rows)[0]
     assert.equal(start.night,night)
-    assert.equal(start.time_left_s,[300,330,360][night-1])
+    assert.equal(start.time_left_s,[240,270,300][night-1])
     assert.equal(start.lanterns.length,night+4)
     assert.equal(start.charms.length,night-1)
     assert.equal(start.motes.length,20)
@@ -134,12 +134,12 @@ test('night three wind acts for 300 ticks and can be disabled',()=>{
 test('terminal precedence on last tick',()=>{
   const lit=Array.from({length:5},(_,i)=>({id:'L'+(i+1),lit:true}))
   const scenario={...quiet,lanterns:lit,time_left_s:1/60}
-  assert.equal(events(run(1,scenario),'game_over')[0].data.reason,'all_lit')
+  assert.equal(events(run(1,scenario),'game_over')[0].data.reason,'dawn_survived')
   assert.equal(events(run(1,{...scenario,player:{pos:[42,-11,0],flames:1}}),'game_over')[0].data.reason,'no_flames')
 })
 test('full night three, 21600 ticks in at most 30 s',()=>{
   const start=performance.now()
-  const rows=run(3,{wind_enabled:false,lanterns:[{id:'L1',lit:true,pos:[0,0,-26]}]},[],21600,10)
+  const rows=run(3,{...quiet,time_left_s:360,lanterns:[{id:'L1',lit:true,pos:[0,0,-26]}]},[],21600,10)
   const elapsed=performance.now()-start
   assert.equal(rows.at(-1).ticks,21600)
   assert.equal(events(rows,'game_over')[0].data.reason,'dawn')

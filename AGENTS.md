@@ -5,3 +5,7 @@ Dùng PRD-0.md làm chuẩn cho CP1. UI và CLI dùng chung mô phỏng 60 Hz. �
 ## CP2
 
 Dùng TICKET-02.md và Test Contract v1.1 cho ba Đêm. CLI và Three.js cùng dùng Game và định nghĩa bản đồ trong src/maps.ts. Theo [skill kiểm chứng CP2](skills/cp2-verification/SKILL.md) khi thay luật hoặc xác nhận bàn giao. Ghi lý do thay kỳ vọng hồi quy so với tag phase-1 trong SPEC-CP2.md.
+
+## CP3
+
+Dùng TICKET-03.md và Contract v1.2. Khi sửa đèn hoặc Bóng Mực, kiểm tra thứ tự trừ dầu, cạn dầu, tương tác, vùng an toàn, pulse và bình minh. Cập nhật các test đã bị luật mới thay thế với lý do trong ADR-03.md. Chạy npm run build và npm test, lưu bằng chứng thực ở evidence/phase3.

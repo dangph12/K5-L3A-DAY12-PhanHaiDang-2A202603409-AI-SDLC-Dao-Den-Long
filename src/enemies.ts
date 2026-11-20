@@ -1,13 +1,14 @@
 import type { Game, Pos } from './game.js'
 
-export type ShadeState = 'spawning' | 'wander' | 'chase' | 'recoil' | 'stunned'
+export type ShadeState = 'spawning' | 'wander' | 'chase' | 'recoil' | 'stunned' | 'drain'
 export type DrifterState = 'idle' | 'chase' | 'flee'
-export interface ShadeSpec { id?: string; pos: Pos; state?: ShadeState; state_ticks_left?: number }
+export interface ShadeSpec { id?: string; pos: Pos; state?: ShadeState; state_ticks_left?: number; target_lantern_id?: string }
 export interface DrifterSpec { id?: string; pos: Pos; state?: DrifterState; stolen?: number; state_ticks_left?: number }
 type Direction = [number, number]
 interface Shade {
   id: string; pos: Pos; state: ShadeState; ticks: number
   direction: Direction; pushLeft: number; ejecting: boolean; heading: number
+  target_lantern_id?:string
 }
 interface Drifter {
   id: string; pos: Pos; state: DrifterState; stolen: number; ticks: number; heading: number
@@ -47,11 +48,11 @@ export class Enemies {
   }
   private addShade(spec: ShadeSpec) {
     const state = spec.state ?? 'wander'
-    const defaults = { spawning: 1, wander: 0, chase: 0, recoil: 60, stunned: 120 }
+    const defaults = { spawning: 1, wander: 0, chase: 0, recoil: 60, stunned: 120, drain: 0 }
     const shade: Shade = {
       id: spec.id ?? this.id('S'), pos: [...spec.pos], state,
       ticks: spec.state_ticks_left ?? defaults[state], heading: this.game.random() * 2 * Math.PI,
-      direction: away(spec.pos, this.game.player.pos), pushLeft: 0, ejecting: false
+      direction: away(spec.pos, this.game.player.pos), pushLeft: 0, ejecting: false,target_lantern_id:spec.target_lantern_id
     }
     this.shades.push(shade)
     this.shades.sort(inIdOrder)
@@ -67,7 +68,7 @@ export class Enemies {
   }
   timers() {
     for (const s of this.shades) {
-      if (s.state === 'wander' || s.state === 'chase') continue
+      if (s.state === 'wander' || s.state === 'chase' || s.state === 'drain') continue
       if (--s.ticks <= 0) {
         s.state = 'wander'
         s.pushLeft = 0
@@ -75,14 +76,26 @@ export class Enemies {
     }
     this.drifters = this.drifters.filter(d => d.state !== 'flee' || --d.ticks > 0)
   }
+  drainFuel(){
+    const g=this.game
+    for(const s of this.shades){
+      if(s.state!=='drain')continue
+      const l=g.lanterns.find(l=>l.id===s.target_lantern_id)
+      if(!l?.lit || l.fuelUnits/60>=g.t.low_fuel_threshold || horizontal(s.pos,l.pos)>2){s.state='wander';continue}
+      l.fuelUnits=Math.max(0,l.fuelUnits-g.t.drain_per_s)
+      if(g.sim_tick%60===0)g.emit('fuel_drain',{lantern_id:l.id,shade_id:s.id,fuel:Number((l.fuelUnits/60).toFixed(1))})
+      if(l.fuelUnits===0){l.lit=false;l.deposited=0;g.emit('lantern_out',{lantern_id:l.id});s.state='wander'}
+    }
+  }
   safe() {
     const g = this.game
     for (const s of this.shades) {
       s.ejecting = false
       for (const l of g.lanterns) {
-        if (!l.lit) continue
+        if (!l.lit || l.fuelUnits/60<g.t.low_fuel_threshold) continue
         const d = horizontal(s.pos, l.pos)
         if (d >= g.t.safe_radius - 1e-9) continue
+        if(s.state==='drain')s.state='wander'
         const dir = away(s.pos, l.pos)
         const step = Math.min(g.t.safe_radius / 30, g.t.safe_radius - d)
         this.translate(s, dir, step, false)
@@ -95,15 +108,17 @@ export class Enemies {
     const [x, y, z] = g.player.pos
     const reaches = (p: Pos) => Math.hypot(p[0] - x, p[1] - (y + 0.8), p[2] - z) <= g.t.pulse_radius
     const ids: string[] = []
+    let pulsePoints=0
     for (const s of this.shades) {
       if (!reaches(s.pos)) continue
+      pulsePoints+=s.state==='drain'?15:g.t.score.per_stun
       s.state = 'stunned'
       s.ticks = Math.round(60 * g.t.pulse_stun_s)
       s.pushLeft = 15
       s.direction = away(s.pos, g.player.pos)
       ids.push(s.id)
     }
-    g.score += ids.length * g.t.score.per_stun
+    g.score += pulsePoints
     g.emit('pulse', {stunned_ids: ids})
     for (const d of this.drifters) {
       if (!reaches(d.pos)) continue
@@ -131,7 +146,7 @@ export class Enemies {
       if (g.night === 3 && Math.hypot(nx, nz) < 2 && y < 14) return false
       if (checkZones) {
         for (const l of g.lanterns) {
-          if (!l.lit) continue
+          if (!l.lit || l.fuelUnits/60<g.t.low_fuel_threshold) continue
           const limit = Math.min(g.t.safe_radius, horizontal(s.pos, l.pos))
           if (Math.hypot(nx - l.pos[0], nz - l.pos[2]) < limit - 1e-10) return false
         }
@@ -167,14 +182,29 @@ export class Enemies {
         this.translate(s, s.direction, 2 / 60)
         continue
       }
+      if(s.state==='drain'){
+        const l=g.lanterns.find(l=>l.id===s.target_lantern_id)
+        if(horizontal(s.pos,p)<=6){s.state='chase'}
+        else if(l?.lit && l.fuelUnits/60<g.t.low_fuel_threshold && horizontal(s.pos,l.pos)<=2)continue
+        else s.state='wander'
+      }
       const d = horizontal(s.pos, p)
       if (!g.respawn && (d <= 12 || (s.state === 'chase' && d <= 18))) {
         s.state = 'chase'
         this.translate(s, away(p, s.pos), Math.min(d, (g.night === 3 ? 4.5 : g.t.shade_speed) / 60))
       } else {
         s.state = 'wander'
-        s.heading += 0.016
-        this.translate(s, [Math.cos(s.heading), Math.sin(s.heading)], (g.night === 3 ? 4.5 : g.t.shade_speed) / 60)
+        const targets=g.lanterns.filter(l=>l.lit && l.fuelUnits/60<g.t.low_fuel_threshold)
+        const pool=targets.length?targets:g.lanterns.filter(l=>!l.lit)
+        const target=pool.sort((a,b)=>horizontal(a.pos,s.pos)-horizontal(b.pos,s.pos)||a.id.localeCompare(b.id))[0]
+        if(target){
+          s.target_lantern_id=target.id
+          if(target.lit && horizontal(s.pos,target.pos)<=2){s.state='drain';continue}
+          this.translate(s,away(target.pos,s.pos),(g.night===3?4.5:g.t.shade_speed)/60)
+        }else{
+          s.heading += 0.016
+          this.translate(s,[Math.cos(s.heading),Math.sin(s.heading)],(g.night===3?4.5:g.t.shade_speed)/60)
+        }
       }
     }
     for (const d of this.drifters) {
@@ -212,7 +242,7 @@ export class Enemies {
       d.ticks = 240
       g.emit('drifter_steal', {drifter_id: d.id, amount: d.stolen, carried: p.carried})
     }
-    if (g.invuln || g.lanterns.some(l => l.lit && horizontal(l.pos, p.pos) <= g.t.safe_radius)) return
+    if (g.invuln || g.lanterns.some(l => l.lit && l.fuelUnits/60>=g.t.low_fuel_threshold && horizontal(l.pos, p.pos) <= g.t.safe_radius)) return
     for (const s of this.shades) {
       if (s.ejecting || (s.state !== 'chase' && s.state !== 'wander')) continue
       if (horizontal(s.pos, p.pos) > g.t.shade_hit_radius || Math.abs(s.pos[1] - p.pos[1]) > 1.5) continue
@@ -235,7 +265,7 @@ export class Enemies {
     if (g.scenario.random_shades !== false && k >= 300 && (k - 300) % interval === 0) {
       const limit = [6, 8, 10][g.night - 1]
       const sites = g.map.spawns.filter(pos => horizontal(pos, g.player.pos) >= 15 &&
-        !g.lanterns.some(l => l.lit && horizontal(l.pos, pos) <= g.t.safe_radius) &&
+        !g.lanterns.some(l => l.lit && l.fuelUnits/60>=g.t.low_fuel_threshold && horizontal(l.pos, pos) <= g.t.safe_radius) &&
         !this.shades.some(s => horizontal(pos, s.pos) < 0.01))
       const count = Math.min(k === 300 ? 2 : 1, limit - this.shades.length, sites.length)
       for (let i = 0; i < count; i++) {
