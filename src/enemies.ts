@@ -170,6 +170,11 @@ export class Enemies {
   move() {
     const g = this.game, p = g.player.pos
     for (const s of this.shades) {
+      if(g.scenario.bench_mode){
+        s.state='wander';s.heading+=.016
+        this.translate(s,[Math.cos(s.heading),Math.sin(s.heading)],g.t.shade_speed/60,false)
+        continue
+      }
       if (s.ejecting || s.state === 'spawning') continue
       if (s.state === 'stunned') {
         if (s.pushLeft > 0) {

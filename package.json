@@ -1,13 +1,16 @@
 {
   "name": "dao-den-long",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.cli.json && vite build",
+    "build": "tsc && tsc -p tsconfig.cli.json && tsc -p tsconfig.server.json && vite build",
+    "start": "node dist-server/server.js",
+    "bench": "node dist-server/bench-runner.js",
+    "soak": "node dist-cli/soak.js",
     "preview": "vite preview",
     "dev": "vite",
-    "test": "node tests/contract.mjs && node tests/phase2.mjs && node tests/phase3.mjs"
+    "test": "node tests/contract.mjs && node tests/phase2.mjs && node tests/phase3.mjs && node tests/phase4.mjs"
   },
   "devDependencies": {
     "@types/node": "25.0.3",

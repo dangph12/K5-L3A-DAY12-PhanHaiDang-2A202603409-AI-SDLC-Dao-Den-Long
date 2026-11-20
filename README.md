@@ -1,37 +1,76 @@
-﻿# Đảo Đèn Lồng · Ba hòn đảo
+# Đảo Đèn Lồng
 
-Cần Node.js 22.12+ và trình duyệt hỗ trợ WebGL 2. Từ thư mục dự án:
+Game sinh tồn góc nhìn thứ ba trên ba hòn đảo. Thu thập đom đóm, giữ đèn sáng tới bình minh và sống sót qua ba Đêm.
+
+![Ảnh gameplay Phase 3](evidence/phase3/night-1.jpg)
+
+## Yêu cầu hệ thống
+
+- Node.js 22.12 trở lên
+- Trình duyệt Chromium hoặc Edge hỗ trợ WebGL 2
+- Benchmark tự động cần cài Edge/Chrome; có thể đặt `BROWSER_PATH` nếu trình duyệt nằm ở vị trí khác
+
+## Cài và chạy
+
+Từ thư mục repo, chạy ba lệnh:
 
 ```sh
 npm ci
 npm run build
-npm run preview -- --open
+npm start
 ```
 
-Chọn **Bắt đầu → Vào đảo**. WASD để đi, di chuột để xoay góc nhìn ngang và dọc, Space để nhảy; nhấn Space ngay trước khi chạm đất để nối cú nhảy, Shift để lướt, E để nạp đèn hoặc châm dầu, Q để Tỏa Sáng. Esc/P mở tạm dừng. Cài đặt lưu âm lượng, độ nhạy chuột và bảng màu dễ phân biệt.
+Mở <http://127.0.0.1:4173>. Server chỉ lắng nghe trên máy cục bộ theo mặc định. Điểm leaderboard được lưu tại `data/leaderboard.json`, tồn tại qua lần chạy lại và không được đưa vào Git.
 
-| Đêm | Thời lượng | Số đèn cần còn sáng lúc bình minh |
-|---|---:|---:|
-| Đảo Bến | 240 giây | 3/5 |
-| Đảo Cau | 270 giây | 4/6 |
-| Đảo Chuông | 300 giây | 5/7 |
+## Điều khiển
 
-Đi qua cầu tre hoặc dùng bục nhảy để tới đảo bên kia ở Đảo Cau. Hai dốc và bục tại (0, 3, 13) dẫn lên tầng trên của Đảo Chuông.
+WASD di chuyển, chuột xoay POV, Space nhảy, Shift lướt, E nạp đèn, Q Tỏa Sáng, P hoặc Esc tạm dừng. Cài đặt cho phép đổi phím, chỉnh âm lượng/độ nhạy, bật giảm chuyển động, chữ lớn và bảng màu dễ phân biệt.
 
-Mỗi đèn mới cần 10 đom đóm. Đèn tắt vì cạn dầu cần 5 để thắp lại. Đèn sáng có 100 dầu, hao 1 mỗi giây. Nhấn E khi đứng gần để châm 10 dầu cho mỗi đom đóm đã dùng. Dưới 30 dầu, đèn mất vùng an toàn và Bóng Mực có thể hút dầu. Mỗi lần thắp thành công tăng sức chứa túi thêm 2, từ 10 tới tối đa 20. Mất cả 3 Ngọn Lửa thì thua ngay. Khi bị đánh, Mây lóe viền đỏ; khi mất đom đóm, các đốm sáng bay khỏi Mây. Thắp hết đèn sớm vẫn cần giữ đủ đèn sáng tới bình minh.
+Mỗi Đêm kéo dài 240, 270 hoặc 300 giây. Đèn sáng hao một dầu mỗi giây; có thể nạp thêm bằng đom đóm. Thắng Đêm khi tới bình minh với ít nhất 60% đèn còn sáng. Mỗi Đêm thắng cộng điểm vào tổng chiến dịch. Khi bị đánh hoặc mất đom đóm, màu nhân vật Mây đổi ngắn để báo sự kiện, không bật popup. Sau khi thua hoặc thắng Đêm 3, có thể lưu tên 3–12 ký tự ASCII chữ/số/gạch dưới lên leaderboard top 10.
 
-Mỗi đom đóm nạp hoặc châm cho 5 điểm. Thắp lần đầu cho 100, thắp lại cho 40. Tỏa Sáng trúng mỗi Bóng Mực cho 5, hoặc 15 nếu nó đang hút dầu. Khi thắng, mỗi đèn còn sáng cho 50 cộng phần nguyên số dầu còn lại; mỗi Ngọn Lửa còn lại cho 50. Tổng điểm Bình Minh cộng ba Đêm đã thắng.
-
-## Kiểm chứng
-
-Chạy `npm test` sau bước build. Chế độ headless dùng Contract v1.2 và chấp nhận scenario/input theo [Ticket-03](TICKET-03.md).
+## Kiểm thử và CLI headless
 
 ```sh
+npm test
 node dist-cli/headless.js --seed 7 --night 1 --ticks 14400 --out dem-1.jsonl
 ```
 
-[ADR về vòng đời đèn](ADR-03.md), [thay đổi tương thích](CHANGELOG-03.md), [nhật ký](NHAT-KY.md) và [bằng chứng CP3](evidence/phase3/) ghi kết quả kiểm chứng. Tag `phase-2` lưu cách chơi theo Contract v1.1.
+Contract v1.3 giữ định dạng JSONL headless của Phase 1–3. Soak chạy 10 Đêm trong cùng tiến trình và mô phỏng các phím theo seed:
 
-## Sáng tạo của tôi
+```sh
+npm run soak -- --seed 7 --nights 10 --out soak.json
+```
 
-Mây đội nón lá có đèn nhỏ. Cầu tre, bục nhảy, tháp chuông, Gió Lạc và quần đảo được dựng bằng hình khối Three.js. Âm thanh được tổng hợp bằng Web Audio trong trình duyệt.
+Xuất leaderboard đúng thứ tự đang lưu:
+
+```sh
+node dist-server/server.js --export-leaderboard out.json
+```
+
+## Benchmark
+
+```sh
+npm run bench -- --seed 42 --duration 30 --out bench.json
+```
+
+Runner mở cửa sổ Chromium 1280×720, dựng cảnh chuẩn 200 Bóng Mực và 100 đom đóm, chạy khởi động 3 giây rồi đo đủ thời lượng. Runner truyền cờ `--disable-gpu-vsync` và `--disable-frame-rate-limit`; phép đo máy phát triển đạt 168.8 FPS trên màn hình 60 Hz nên `vsync_off` là `true` cho lần chạy này. Trên máy khác, kiểm tra lại trường này và ghi `false` nếu driver/compositor vẫn khóa tốc độ khung hình. `peak_mem_mb` là `null`: benchmark chạy bản web và chưa đo đáng tin cậy tổng RSS của tiến trình trình duyệt cùng các tiến trình con. Đo cuối cùng để chấm điểm phải chạy trên máy do giảng viên công bố.
+
+Benchmark tự tìm Edge/Chrome ở đường dẫn mặc định. Có thể chỉ đường dẫn khác trước lệnh:
+
+```sh
+BROWSER_PATH="/path/to/chrome" npm run bench -- --seed 42 --duration 30 --out bench.json
+```
+
+Build production tách code ứng dụng (~20 kB gzip) khỏi Three.js (~131 kB gzip) để tải song song và cache engine riêng.
+
+## Bằng chứng và tài liệu phát hành
+
+- `bench.json`, `soak.json` — kết quả tự chạy trên máy phát triển; không thay kết quả chấm trên máy giảng viên.
+- `evidence/phase4/` — build, test, smoke test và thông tin máy.
+- `ADR-03.md`, `CHANGELOG-03.md`, `CHANGELOG.md`, `CREDITS.md`, `LICENSE` — quyết định và lịch sử phát hành.
+- `RETRO-04.md` — hồi tưởng qua bốn phase.
+- [Gói v1.0.0](release/dao-den-long-v1.0.0.zip) — đã thử giải nén sạch; cần Node.js 22.12+ để chạy server tích hợp.
+
+## Giấy phép
+
+Mã nguồn dự án dùng MIT; nguồn công cụ và nội dung được ghi trong [CREDITS.md](CREDITS.md).

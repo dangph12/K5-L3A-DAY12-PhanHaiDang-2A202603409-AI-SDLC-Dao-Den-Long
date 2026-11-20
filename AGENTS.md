@@ -9,3 +9,7 @@ Dùng TICKET-02.md và Test Contract v1.1 cho ba Đêm. CLI và Three.js cùng d
 ## CP3
 
 Dùng TICKET-03.md và Contract v1.2. Khi sửa đèn hoặc Bóng Mực, kiểm tra thứ tự trừ dầu, cạn dầu, tương tác, vùng an toàn, pulse và bình minh. Cập nhật các test đã bị luật mới thay thế với lý do trong ADR-03.md. Chạy npm run build và npm test, lưu bằng chứng thực ở evidence/phase3.
+
+## CP4
+
+Dùng TICKET-04.md và Contract v1.3. Giữ nguyên luật và đầu ra JSONL headless v1.0–v1.2. Chạy `npm run build`, `npm test`, soak 10 Đêm và benchmark 30 giây; ghi JSON do lệnh thật tạo cùng giới hạn phép đo. Lưu bằng chứng ở evidence/phase4. Không ghi nhận benchmark đạt ngưỡng giảng viên nếu máy chưa được công bố.

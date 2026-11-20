@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {"noEmit": false, "rootDir":"src","outDir":"dist-server"},
+  "include": ["src/server.ts", "src/bench-runner.ts", "src/leaderboard.ts"]
+}

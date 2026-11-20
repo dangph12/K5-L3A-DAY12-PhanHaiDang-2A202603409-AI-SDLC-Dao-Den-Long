@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {"noEmit": false, "rootDir":"src","outDir":"dist-cli"},
-  "include": ["src/headless.ts"]
+  "include": ["src/headless.ts", "src/soak.ts", "src/leaderboard.ts"]
 }

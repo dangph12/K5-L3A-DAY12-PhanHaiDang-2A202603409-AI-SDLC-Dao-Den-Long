@@ -1,9 +1,11 @@
 {
-  "contract_version": "1.2",
+  "contract_version": "1.3",
   "team": "2A202603409-PhanHaiDang",
   "build_cmd": "npm ci && npm run build",
-  "run_cmd": "npm run preview -- --open",
+  "run_cmd": "node dist-server/server.js",
   "headless_cmd": "node dist-cli/headless.js",
+  "bench_cmd": "node dist-server/bench-runner.js",
+  "soak_cmd": "node dist-cli/soak.js",
   "tuning": {
     "player_speed": 6,
     "lantern_count_night1": 5,

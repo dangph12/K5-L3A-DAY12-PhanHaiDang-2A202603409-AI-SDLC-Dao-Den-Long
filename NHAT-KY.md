@@ -49,5 +49,12 @@ TICKET-03.md thay luật thắng sớm bằng sống tới bình minh, thêm nhi
 ### Phản hồi CP3 sau phát hành
 
 - **Bunny hop** — Space được đệm trong 6 tick trước khi tiếp đất. Cú nhảy vẫn chỉ bắt đầu khi Mây chạm đất và giữ nguyên vận tốc nhảy chuẩn.
-- **Tổn thất dễ thấy** — Khi Bóng Mực đánh trúng, HUD báo mất Ngọn Lửa và đom đóm rơi. Khi Gió Lạc cướp, HUD báo đúng số lượng; màu và nền nháy phân biệt hai sự kiện.
+- **Tổn thất dễ thấy** — Khi Bóng Mực đánh trúng hoặc Gió Lạc cướp đom đóm, màu nhân vật Mây đổi ngắn để phân biệt sự kiện. Không hiện popup hay vòng effect; đom đóm rơi là vật thể gameplay khi luật đánh trúng làm rơi túi.
 - **Tốc độ chạy** — Giữ nguyên số chuẩn theo ticket.
+
+## CP4 · Bản phát hành v1.0.0
+
+- **Contract** — Nâng lên v1.3 với `bench_cmd` và `soak_cmd`; headless JSONL và luật ba Đêm được giữ nguyên. Assertion version CP3 được cập nhật từ 1.2 lên 1.3, có ghi lý do trong test.
+- **Kiểm chứng thật** — `npm run build` và `npm test` đều thành công; log tại `evidence/phase4/`. Soak seed 7 chạy 10 Đêm trong cùng tiến trình, 0 crash, RSS 50→56 MB (1.12×). Benchmark seed 42 đo 30 giây trên Edge 145/Intel HD Graphics 630: 172.1 FPS trung bình, p1-low 37.2 FPS, load 2814 ms; tất cả ngưỡng tự đo đều qua. Kết quả máy chấm chưa có.
+- **Đóng gói** — Tạo `release/dao-den-long-v1.0.0.zip`; thử giải nén sạch, server phục vụ game và leaderboard API thành công. Leaderboard lưu vào file, đọc lại sau khởi động server và xuất CLI được test tự động.
+- **Giới hạn phép đo** — RSS benchmark là `null` vì bản web chưa đo đáng tin toàn bộ tiến trình browser; cờ tắt vsync được xác nhận bằng FPS cao hơn màn hình 60 Hz. Video demo thuộc CP5.

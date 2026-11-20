@@ -9,7 +9,7 @@ export interface Player {pos:Pos;vel:Pos;grounded:boolean;carried:number;flames:
 export interface CharmSpec {id:string;pos?:Pos;available?:boolean;respawn_ticks?:number;respawn_s?:number}
 export interface Scenario {
   player?:Partial<Player>&{invuln_ticks?:number;dash_cd_ticks?:number;pulse_cd_ticks?:number;charm_ticks?:number;successful_lights?:number}
-  random_motes?:boolean;random_shades?:boolean;random_drifters?:boolean;wind_enabled?:boolean
+  random_motes?:boolean;random_shades?:boolean;random_drifters?:boolean;wind_enabled?:boolean;bench_mode?:boolean
   motes?:Pos[];shades?:ShadeSpec[];drifters?:DrifterSpec[];charms?:CharmSpec[]
   lanterns?:(Partial<Lantern>&{id:string;fuel?:number})[];time_left_s?:number
 }
@@ -147,7 +147,7 @@ export class Game {
     for(const c of this.charms)if(!c.available && --c.respawn<=0)c.available=true
     this.enemies.timers()
     for(const l of this.lanterns){
-      if(!l.lit)continue
+      if(!l.lit||this.scenario.bench_mode)continue
       l.fuelUnits-=this.t.fuel_decay_per_s
       if(l.fuelUnits<=0){
         l.fuelUnits=0;l.lit=false;l.deposited=0
@@ -218,22 +218,24 @@ export class Game {
     }
     if(this.state==='paused'){this.previous={...input};return}
     this.sim_tick++;this.timers();this.enemies.drainFuel()
-    if(this.respawn){
+    if(this.scenario.bench_mode){
+      this.player.pos=[0,0,0];this.player.vel=[0,0,0];this.player.grounded=true
+    }else if(this.respawn){
       if(--this.respawn===0){
         this.player.pos=copy(this.map.start);this.player.vel=[0,0,0];this.player.grounded=true;this.invuln=90;this.facing=[0,1]
       }
     }else this.move(input)
-    if(!this.respawn){this.collect();if(input.interact && !this.previous.interact)this.deposit()}
-    this.enemies.safe()
-    if(!this.respawn && input.pulse && !this.previous.pulse && !this.pulseCd && this.player.carried>=this.t.pulse_cost){
+    if(!this.scenario.bench_mode&&!this.respawn){this.collect();if(input.interact && !this.previous.interact)this.deposit()}
+    if(!this.scenario.bench_mode)this.enemies.safe()
+    if(!this.scenario.bench_mode&&!this.respawn && input.pulse && !this.previous.pulse && !this.pulseCd && this.player.carried>=this.t.pulse_cost){
       this.player.carried-=this.t.pulse_cost;this.pulseCd=Math.round(this.t.pulse_cooldown_s*60);this.enemies.pulse()
     }
     this.enemies.move()
-    if(!this.respawn)this.enemies.contacts()
-    if(this.scenario.random_motes!==false && this.sim_tick%240===0)this.spawnMote()
-    this.enemies.spawn()
+    if(!this.scenario.bench_mode&&!this.respawn)this.enemies.contacts()
+    if(!this.scenario.bench_mode&&this.scenario.random_motes!==false && this.sim_tick%240===0)this.spawnMote()
+    if(!this.scenario.bench_mode)this.enemies.spawn()
     const litCount=this.lanterns.filter(l=>l.lit).length
-    const reason=this.player.flames===0?'no_flames':this.left===0?(litCount>=Math.ceil(this.t.win_ratio*this.lanterns.length)?'dawn_survived':'dawn'):null
+    const reason=this.scenario.bench_mode?null:this.player.flames===0?'no_flames':this.left===0?(litCount>=Math.ceil(this.t.win_ratio*this.lanterns.length)?'dawn_survived':'dawn'):null
     if(reason){
       this.state=reason==='dawn_survived'?'won':'lost'
       if(this.state==='won')this.score+=this.lanterns.filter(l=>l.lit).reduce((total,l)=>total+50+Math.floor(l.fuelUnits/60),0)+this.player.flames*50

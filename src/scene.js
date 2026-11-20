@@ -265,7 +265,7 @@ export function createView(host){
     obj.material.userData.baseColor=obj.material.color.clone()
     avatarMaterials.push(obj.material)
   })
-  let tintUntil=-1,tintColor=0xff5a5f
+  let tintUntil=-1,tintColor=0xff5a5f,tintPulse=true
   const shadow=part(scene,new T.CircleGeometry(.58,48),new T.MeshBasicMaterial({
     color:0x132537,transparent:true,opacity:.38,depthWrite:false
   }),[0,.024,0])
@@ -275,6 +275,14 @@ export function createView(host){
   }),[0,0,0])
   wave.rotation.x=-Math.PI/2
   const leaves=Array.from({length:14},()=>part(scene,rock,mats.sand,[0,0,0],[.23,.035,.08]))
+  const benchmarkGeo=new T.SphereGeometry(1,12,8)
+  const benchmarkShades=new T.InstancedMesh(benchmarkGeo,mats.ink,200)
+  const benchmarkRims=new T.InstancedMesh(benchmarkGeo,inkEdge,200)
+  const benchmarkMotes=new T.InstancedMesh(benchmarkGeo,firefly,100)
+  const benchmarkHalos=new T.InstancedMesh(benchmarkGeo,haloMaterial,100)
+  const benchmarkMeshes=[benchmarkShades,benchmarkRims,benchmarkMotes,benchmarkHalos]
+  for(const mesh of benchmarkMeshes){mesh.frustumCulled=false;mesh.visible=false;scene.add(mesh)}
+  const instanceTransform=new T.Object3D()
   const posts=[],motemap=new Map(),shademap=new Map(),driftermap=new Map(),charmmap=new Map()
   let night=0,terrain,pulseAt=-100
   function sync(list,map,make,update){
@@ -302,12 +310,17 @@ export function createView(host){
       pulseAt=game.sim_tick
       wave.position.set(game.player.pos[0],game.player.pos[1]+.15,game.player.pos[2])
     },
-    impact(game,kind,amount){
+    impact(game,kind,amount,reducedMotion=false){
       if(amount<=0 && kind==='stolen')return
       tintColor=kind==='damage'?0xff5a5f:0xffe58a
+      tintPulse=!reducedMotion
       tintUntil=game.sim_tick+30
     },
     reset(){pulseAt=-100},
+    rendererInfo(){
+      const gl=renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info')
+      return `Three.js r${T.REVISION} / WebGL2 ${debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)}`
+    },
     arrow(game){
       let nearest=null,best=Infinity
       const p=game.player.pos
@@ -324,7 +337,22 @@ export function createView(host){
       if(local.z>=0) return Math.atan2(local.x,-Math.max(.001,Math.abs(local.z)))*180/Math.PI
       return Math.atan2(projected.x*camera.aspect,projected.y)*180/Math.PI
     },
-    draw(game,yaw,pitch=0,colorblind=false){
+    shadeArrow(game){
+      let nearest=null,best=Infinity
+      const p=game.player.pos
+      for(const shade of game.shades){
+        const d=Math.hypot(shade.pos[0]-p[0],shade.pos[2]-p[2])
+        if(d<best){nearest=shade;best=d}
+      }
+      if(!nearest)return null
+      projected.set(...nearest.pos);projected.y+=.8
+      const local=camera.worldToLocal(projected.clone())
+      projected.project(camera)
+      let x=projected.x,y=projected.y
+      if(local.z<0){x=-x;y=-y}
+      return Math.atan2(x,y)*180/Math.PI
+    },
+    draw(game,yaw,pitch=0,colorblind=false,benchElapsed,reducedMotion=false){
       if(night!==game.night){
         if(terrain){scene.remove(terrain);terrain.userData.dispose()}
         night=game.night
@@ -334,7 +362,7 @@ export function createView(host){
       }
       const [x,y,z]=game.player.pos,a=radians(yaw),ticks=game.sim_tick
       if(ticks<tintUntil){
-        const strength=.35+.45*Math.abs(Math.sin(ticks*.65))
+        const strength=tintPulse && !reducedMotion ? .35+.45*Math.abs(Math.sin(ticks*.65)) : .65
         for(const material of avatarMaterials)material.color.lerpColors(material.userData.baseColor??material.color,new T.Color(tintColor),strength)
       }else for(const material of avatarMaterials)material.color.copy(material.userData.baseColor??material.color)
       may.position.set(x,y,z)
@@ -345,8 +373,14 @@ export function createView(host){
       const floor=mapFor(night).ground(x,z)
       shadow.visible=Number.isFinite(floor) && y>=floor-.01
       if(shadow.visible) shadow.position.set(x,floor+.024,z)
-      camera.position.set(x+Math.sin(a)*10*Math.cos(pitch),y+6.8+10*Math.sin(pitch),z+Math.cos(a)*10*Math.cos(pitch))
-      camera.lookAt(x,y+1.05,z)
+      if(benchElapsed===undefined){
+        camera.position.set(x+Math.sin(a)*10*Math.cos(pitch),y+6.8+10*Math.sin(pitch),z+Math.cos(a)*10*Math.cos(pitch))
+        camera.lookAt(x,y+1.05,z)
+      }else{
+        const orbit=benchElapsed*Math.PI*2/15
+        camera.position.set(30*Math.cos(orbit),15,-30*Math.sin(orbit))
+        camera.lookAt(0,0,0)
+      }
       for(const [i,l] of game.lanterns.entries()){
         if(!posts[i]){posts[i]=beacon();scene.add(posts[i].root)}
         const {root,glass,center,pool,fuelBack,fuelBar,tear}=posts[i]
@@ -367,17 +401,37 @@ export function createView(host){
       }
       for(let i=game.lanterns.length;i<posts.length;i++) posts[i].root.visible=false
       ambient.intensity=.15+.55*game.lanterns.filter(l=>l.lit).length/game.lanterns.length
-      sync(game.motes,motemap,makeMote,(o,e)=>{
-        o.position.y+=.62+.12*Math.sin(ticks/16+o.id)
-        o.scale.setScalar(e.kind==='dropped'?.88:1)
-      })
-      sync(game.shades,shademap,makeShade,(o,e)=>{
-        o.position.y+=.1*Math.sin(ticks/13)
-        o.rotation.y=Math.atan2(x-o.position.x,z-o.position.z)
-        o.userData.body.material=e.state==='stunned'?mats.stun:mats.ink
-        o.userData.rim.material=colorblind?inkEdgeAccessible:inkEdge
-        for(const eye of o.userData.eyes)eye.material=colorblind?inkEyesAccessible:inkEyes
-      })
+      if(game.scenario.bench_mode){
+        benchmarkMeshes.forEach(mesh=>mesh.visible=true)
+        benchmarkShades.count=benchmarkRims.count=game.shades.length
+        game.shades.forEach((e,i)=>{
+          instanceTransform.position.set(e.pos[0],e.pos[1]+.1*Math.sin(ticks/13),e.pos[2])
+          instanceTransform.rotation.set(0,Math.atan2(x-e.pos[0],z-e.pos[2]),0)
+          instanceTransform.scale.set(.58,.66,.52);instanceTransform.updateMatrix();benchmarkShades.setMatrixAt(i,instanceTransform.matrix)
+          instanceTransform.scale.set(.62,.70,.56);instanceTransform.updateMatrix();benchmarkRims.setMatrixAt(i,instanceTransform.matrix)
+        })
+        benchmarkShades.instanceMatrix.needsUpdate=benchmarkRims.instanceMatrix.needsUpdate=true
+        benchmarkMotes.count=benchmarkHalos.count=game.motes.length
+        game.motes.forEach((e,i)=>{
+          instanceTransform.position.set(e.pos[0],e.pos[1]+.62+.12*Math.sin(ticks/16+Number(e.id.slice(1))),e.pos[2])
+          instanceTransform.rotation.set(0,0,0);instanceTransform.scale.set(.15,.17,.15);instanceTransform.updateMatrix();benchmarkMotes.setMatrixAt(i,instanceTransform.matrix)
+          instanceTransform.scale.set(.30,.32,.30);instanceTransform.updateMatrix();benchmarkHalos.setMatrixAt(i,instanceTransform.matrix)
+        })
+        benchmarkMotes.instanceMatrix.needsUpdate=benchmarkHalos.instanceMatrix.needsUpdate=true
+      }else{
+        benchmarkMeshes.forEach(mesh=>mesh.visible=false)
+        sync(game.motes,motemap,makeMote,(o,e)=>{
+          o.position.y+=.62+.12*Math.sin(ticks/16+o.id)
+          o.scale.setScalar(e.kind==='dropped'?.88:1)
+        })
+        sync(game.shades,shademap,makeShade,(o,e)=>{
+          o.position.y+=.1*Math.sin(ticks/13)
+          o.rotation.y=Math.atan2(x-o.position.x,z-o.position.z)
+          o.userData.body.material=e.state==='stunned'?mats.stun:mats.ink
+          o.userData.rim.material=colorblind?inkEdgeAccessible:inkEdge
+          for(const eye of o.userData.eyes)eye.material=colorblind?inkEyesAccessible:inkEyes
+        })
+      }
       sync(game.drifters,driftermap,makeDrifter,(o,e)=>{
         o.position.y+=.55
         o.rotation.y=Math.atan2(x-o.position.x,z-o.position.z)+(e.state==='flee'?Math.PI:0)

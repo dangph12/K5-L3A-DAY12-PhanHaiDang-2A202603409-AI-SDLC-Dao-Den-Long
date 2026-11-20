@@ -1,0 +1,1 @@
+﻿CPU: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz RAM: 23.9 GiB GPU: Intel HD Graphics 630 (WebGL renderer string from bench.json) OS: Microsoft Windows 10 Home 10.0.19045 Display: 1024x768 @ 60 Hz Browser: Microsoft Edge 145.0.3800.65 Node: v24.22.1 npm: 11.19.1

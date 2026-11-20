@@ -2,7 +2,8 @@
 import {readFileSync} from 'node:fs'
 import {Game,idle} from '../dist-cli/game.js'
 const {tuning:t,contract_version}=JSON.parse(readFileSync('game.contract.json','utf8'))
-assert.equal(contract_version,'1.2')
+// CP4 raises the envelope to 1.3 for bench/soak commands; the v1.2 tuning and game rules stay unchanged.
+assert.equal(contract_version,'1.3')
 const quiet={random_motes:false,random_shades:false,random_drifters:false,wind_enabled:false}
 const press=game=>game.step({...idle(),interact:true})
 const g=new Game(t,1,{...quiet,player:{carried:10},lanterns:[{id:'L1',pos:[0,0,0]}]},1)
