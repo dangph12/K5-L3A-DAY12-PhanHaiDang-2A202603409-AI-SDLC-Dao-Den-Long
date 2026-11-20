@@ -1,0 +1,8 @@
+PASS tick zero, interval, end
+PASS camera, diagonal normalization, retained move, jump edge
+PASS pickup, partial deposit, boundaries, held interact
+PASS pulse radius, cost, cooldown, push and stun
+PASS safe zone, hit loss, invulnerability and no_flames
+PASS win, scoring, setup without events, dawn
+PASS deterministic bytes, default seed and generated IDs
+PASS invalid scenario and inputs exit 2 with stderr

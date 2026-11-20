@@ -1,5 +1,40 @@
 # Day 12 — AI SDLC: Đảo Đèn Lồng
 
+## Chơi Đêm 1 · Đảo Bến
+
+Dùng Node.js 22.12 trở lên và npm trên macOS, Linux hoặc Windows. Chạy từ thư mục gốc rồi mở địa chỉ Vite hiển thị. Trình duyệt cần WebGL 2.
+
+```sh
+npm ci
+npm run build
+npm run preview -- --open
+```
+
+Đi bằng **WASD**, kéo chuột trái để xoay camera, **Space** để nhảy. Mây tự nhặt đom đóm và mang tối đa 8 con. Đến gần đèn, nhấn **E** để nạp. Mỗi đèn cần 5 con, có thể nạp từng phần. Nhấn **Q** để tiêu 2 đom đóm và đẩy Bóng Mực ra xa. Đèn đã sáng tạo vùng an toàn. Thắp cả 5 đèn trước bình minh để thắng. Hết giờ hoặc mất cả 3 lửa thì thua. Nút **Chơi lại** bắt đầu một lượt mới.
+
+Mỗi đom đóm nhặt được cho 10 điểm, mỗi đèn thắp được cho 100 điểm và mỗi Bóng Mực trúng xung sáng cho 5 điểm. Khi thắng, cộng phần nguyên của số giây còn lại và 25 điểm cho mỗi lửa còn lại. Mép đảo chặn bước chân nên `fall_enabled` bằng `false`.
+
+### Kiểm chứng Phase 1
+
+Sau bước build, chạy `npm test` để kiểm tra CLI và một lượt thắng từ trạng thái mặc định. Ví dụ sau dựng sẵn bốn đèn sáng rồi nhặt đom đóm cuối để kiểm tra thứ tự event, điểm và điều kiện thắng.
+
+```sh
+node dist-cli/headless.js --night 1 --seed 7 --ticks 60 --scenario tests/win.json --inputs tests/interact.json --snapshot-every 1 --out win.jsonl
+```
+
+Để chạy lại toàn bộ Đêm 1 bằng cùng một lộ trình và đối chiếu kết quả với `evidence/seed-7.jsonl`:
+
+```sh
+node tests/night1.mjs route.json
+node dist-cli/headless.js --night 1 --seed 7 --ticks 18000 --inputs route.json --snapshot-every 18000 --out seed-7.jsonl
+```
+
+Các giá trị cân bằng nằm trong [game.contract.json](game.contract.json). Xem [bằng chứng](evidence/) và [nhật ký](NHAT-KY.md) để biết những bước đã kiểm tra.
+
+### Sáng tạo của tôi
+
+Phase 1 tập trung vào phần lõi. Nón lá của Mây treo đèn nhỏ, thân đảo nổi giữa mây, năm đèn chuyển sang vàng cam và làm cảnh sáng dần. Các chi tiết hiển thị dùng hình khối Three.js.
+
 > **Cá nhân** (1 người / 1 MSSV) · Áp dụng SDLC cùng AI để xây một **game 3D** qua **4 phase**, từ yêu cầu ban đầu tới bản phát hành.
 > **Lab board + trợ giảng:** **[Đảo Đèn Lồng Lab](https://claude.ai/artifact/Q1RYyv1dxjUczzCbd2ZnoW)**
 
