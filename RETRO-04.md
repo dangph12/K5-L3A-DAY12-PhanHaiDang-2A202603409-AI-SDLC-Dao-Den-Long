@@ -8,7 +8,7 @@
 
 Nhật ký Phase 1–2 ghi lại các lượt thử ban đầu thua do chọn vị trí chiến thuật hoặc đường đi sai; scenario, snapshot và log đã giúp phân biệt lỗi bot với lỗi mô phỏng. Trong Phase 3, phép thử kiểm tra tác động trực tiếp lên điểm, nhiên liệu, vùng an toàn và kết thúc Đêm để phát hiện các giả định không còn đúng.
 
-Trong Phase 4, lần đầu chạy `npm test` dừng ở assertion cũ đòi contract 1.2. Đây là kỳ vọng phiên bản đã lỗi thời vì contract 1.3 chỉ thêm lệnh, không đổi luật; cập nhật assertion kèm lý do và chạy lại toàn bộ suite. Smoke benchmark cũng cho thấy `load_ms` ban đầu đo tới lúc hoàn tất benchmark thay vì khung đầu tiên; đã đổi điểm lấy số đo và chạy benchmark lại. Các lượt thử này củng cố việc dùng output thật để kiểm tra định nghĩa trường đo.
+Trong Phase 4, lần đầu chạy `npm test` dừng ở assertion cũ đòi contract 1.2. Đây là kỳ vọng phiên bản đã lỗi thời vì contract 1.3 chỉ thêm lệnh, không đổi luật; cập nhật assertion kèm lý do và chạy lại toàn bộ suite. Smoke benchmark cũng cho thấy `load_ms` ban đầu đo tới lúc hoàn tất benchmark thay vì khung đầu tiên; đã đổi điểm lấy số đo và chạy benchmark lại. Với hiệu ứng chịu sát thương và mất đom đóm, đề xuất ban đầu dùng thông báo rồi vòng sáng, trong khi yêu cầu cuối cùng chỉ cần đổi màu nhân vật. Phản hồi trực tiếp khi xem game giúp loại bỏ hai cách thể hiện sai ý. Các lượt thử này củng cố việc dùng output thật và quan sát gameplay để kiểm tra kết quả.
 
 ## Harness hữu ích nhất
 
@@ -16,7 +16,7 @@ Trong Phase 4, lần đầu chạy `npm test` dừng ở assertion cũ đòi con
 
 ## Token và chi phí AI
 
-Phiên làm việc hiện tại không cung cấp báo cáo token hoặc chi phí theo repo. Không có cơ sở để đưa ra một con số ước tính đáng tin, nên retro ghi rõ là chưa đo được thay vì tự tạo số. Cách tiết kiệm đã áp dụng là đọc đúng các file liên quan, tái sử dụng mô phỏng/contract, thêm server Node tích hợp không kéo framework/database và chạy smoke benchmark ngắn trước lượt 30 giây.
+Phiên làm việc hiện tại không cung cấp báo cáo token hoặc chi phí theo repo. Không có cơ sở để đưa ra một con số ước tính đáng tin, nên retro ghi rõ là chưa đo được thay vì tự tạo số. Mức hạn dùng giảm từ 15% xuống 8% được ghi trong video chỉ là chỉ báo của tài khoản, không thể quy đổi ra token hoặc tiền. Cách tiết kiệm đã áp dụng là đọc đúng các file liên quan, tái sử dụng mô phỏng/contract, thêm server Node tích hợp không kéo framework/database và chạy smoke benchmark ngắn trước lượt 30 giây.
 
 ## Nếu làm lại
 

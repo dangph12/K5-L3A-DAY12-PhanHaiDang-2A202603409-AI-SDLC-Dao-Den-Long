@@ -1,5 +1,7 @@
 # Đảo Đèn Lồng
 
+[Xem video demo MP4 — 4 phút 33 giây](docs/demo/demo.mp4)
+
 Game sinh tồn góc nhìn thứ ba trên ba hòn đảo. Thu thập đom đóm, giữ đèn sáng tới bình minh và sống sót qua ba Đêm.
 
 ![Ảnh gameplay Phase 3](evidence/phase3/night-1.jpg)

@@ -1,0 +1,7 @@
+CHECKPOINT 5 - BANG CHUNG CHAY GAME
+
+npm test: PASS Phase 1-4
+Headless Dem 1, seed 7: won, tick 3, score 477
+Benchmark 30 s, seed 42:
+  avg 172.1 FPS, p1 37.2 FPS, load 2814 ms
+Soak 10 Dem, seed 7: 0 crashes, RSS 50 -> 56 MB
