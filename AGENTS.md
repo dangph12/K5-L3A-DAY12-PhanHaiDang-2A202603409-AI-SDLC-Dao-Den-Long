@@ -1,3 +1,7 @@
 # Đảo Đèn Lồng
 
 Dùng PRD-0.md làm chuẩn cho CP1. UI và CLI dùng chung mô phỏng 60 Hz. Đọc tuning từ game.contract.json. Sau khi đổi luật, chạy npm run build và npm test rồi ghi bằng chứng thật vào nhật ký.
+
+## CP2
+
+Dùng TICKET-02.md và Test Contract v1.1 cho ba Đêm. CLI và Three.js cùng dùng Game và định nghĩa bản đồ trong src/maps.ts. Theo [skill kiểm chứng CP2](skills/cp2-verification/SKILL.md) khi thay luật hoặc xác nhận bàn giao. Ghi lý do thay kỳ vọng hồi quy so với tag phase-1 trong SPEC-CP2.md.

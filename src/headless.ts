@@ -13,26 +13,39 @@ const pos=(x:unknown)=>Array.isArray(x) && x.length===3 && x.every(num)
 function optional(obj:Dict,key:string,test:(x:unknown)=>boolean){
   if(key in obj) check(test(obj[key]),'Giá trị sai: '+key)
 }
-function scenario(x:unknown):Scenario {
+function scenario(x:unknown,night:number):Scenario {
   check(dict(x),'Scenario phải là object')
-  for(const key of ['random_motes','random_shades']) optional(x,key,v=>typeof v==='boolean')
+  for(const key of ['random_motes','random_shades','random_drifters','wind_enabled']) optional(x,key,v=>typeof v==='boolean')
   optional(x,'time_left_s',v=>num(v) && v>=0)
   if('player' in x){
     check(dict(x.player),'player không hợp lệ')
     optional(x.player,'pos',pos)
-    for(const key of ['flames','carried']) optional(x.player,key,nat)
+    optional(x.player,'vel',pos)
+    optional(x.player,'grounded',v=>typeof v==='boolean')
+    for(const key of ['flames','carried','invuln_ticks','dash_cd_ticks','pulse_cd_ticks','charm_ticks']) optional(x.player,key,nat)
   }
   optional(x,'motes',v=>Array.isArray(v) && v.every(pos))
-  for(const key of ['shades','lanterns']){
+  for(const key of ['shades','lanterns','drifters','charms']){
     if(!(key in x)) continue
     const list=x[key]
     check(Array.isArray(list),key+' phải là mảng')
     const ids=new Set<string>()
     for(const item of list){
       check(dict(item),key+' sai định dạng')
-      if(key==='shades') check(pos(item.pos),'shade.pos sai định dạng')
-      else {
-        check(typeof item.id==='string' && /^L[1-5]$/.test(item.id),'ID đèn sai')
+      if(key==='shades'||key==='drifters') {
+        check(pos(item.pos),key+'.pos sai định dạng')
+        const states=key==='shades'?['spawning','wander','chase','recoil','stunned']:['idle','chase','flee']
+        optional(item,'state',v=>typeof v==='string' && states.includes(v))
+        optional(item,'state_ticks_left',nat)
+        if(key==='drifters') optional(item,'stolen',nat)
+      } else if(key==='charms'){
+        check(typeof item.id==='string','Thiếu ID bùa')
+        optional(item,'pos',pos)
+        optional(item,'available',v=>typeof v==='boolean')
+        optional(item,'respawn_ticks',nat)
+        optional(item,'respawn_s',v=>num(v)&&v>=0)
+      } else {
+        check(typeof item.id==='string' && /^L[1-7]$/.test(item.id) && Number(item.id.slice(1))<=night+4,'ID đèn sai')
         optional(item,'pos',pos)
         optional(item,'lit',v=>typeof v==='boolean')
         optional(item,'deposited',nat)
@@ -54,7 +67,7 @@ function inputs(x:unknown):Frame[]{
     previous=frame.tick
     optional(frame,'move',v=>Array.isArray(v) && v.length===2 && v.every(n=>num(n) && Math.abs(n)<=1))
     optional(frame,'cam_yaw_deg',num)
-    for(const key of ['jump','interact','pulse','dash']) optional(frame,key,v=>typeof v==='boolean')
+    for(const key of ['jump','interact','pulse','dash','pause']) optional(frame,key,v=>typeof v==='boolean')
   }
   return x.frames as Frame[]
 }
@@ -70,18 +83,20 @@ function main(){
     return Number(args[key])
   }
   const ticks=integer('ticks'),seed=integer('seed'),every=args['snapshot-every']===undefined?10:integer('snapshot-every')
-  check(integer('night')===1 && ticks>=0 && every>0 && args.out,'Cần --night 1 --ticks N --out file')
-  const s=args.scenario?load(args.scenario,scenario):{}
+  const night=integer('night')
+  check(night>=1 && night<=3 && ticks>=0 && every>0 && args.out,'Cần --night 1|2|3 --ticks N --out file')
+  const s=args.scenario?load(args.scenario,x=>scenario(x,night)):{}
   const frames=args.inputs?load(args.inputs,inputs):[]
   const contract=JSON.parse(readFileSync(new URL('../game.contract.json',import.meta.url),'utf8'))
-  const game=new Game(contract.tuning,seed,s)
+  const game=new Game(contract.tuning,seed,s,night)
   const file=openSync(args.out,'w')
   const write=(o:object)=>writeSync(file,JSON.stringify(o)+'\n')
   try{
     write(game.snapshot())
+    write({type:'event',tick:0,name:'night_start',data:{night}})
     let i=0
     const input=idle()
-    while(game.tick<ticks && game.state==='playing'){
+    while(game.tick<ticks && (game.state==='playing'||game.state==='paused')){
       if(frames[i]?.tick===game.tick) Object.assign(input,frames[i++])
       game.step(input)
       for(const event of game.events) write(event)
