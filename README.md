@@ -1,8 +1,6 @@
-# Day 12 — AI SDLC: Đảo Đèn Lồng
+﻿# Đảo Đèn Lồng · Ba hòn đảo
 
-## Chơi Đêm 1 · Đảo Bến
-
-Dùng Node.js 22.12 trở lên và npm trên macOS, Linux hoặc Windows. Chạy từ thư mục gốc rồi mở địa chỉ Vite hiển thị. Trình duyệt cần WebGL 2.
+Chơi ba Đêm bằng Node.js 22.12+ và trình duyệt có WebGL 2. Mở terminal trong thư mục dự án.
 
 ```sh
 npm ci
@@ -10,30 +8,39 @@ npm run build
 npm run preview -- --open
 ```
 
-Đi bằng **WASD**, kéo chuột trái để xoay camera, **Space** để nhảy. Mây tự nhặt đom đóm và mang tối đa 8 con. Đến gần đèn, nhấn **E** để nạp. Mỗi đèn cần 5 con, có thể nạp từng phần. Nhấn **Q** để tiêu 2 đom đóm và đẩy Bóng Mực ra xa. Đèn đã sáng tạo vùng an toàn. Thắp cả 5 đèn trước bình minh để thắng. Hết giờ hoặc mất cả 3 lửa thì thua. Nút **Chơi lại** bắt đầu một lượt mới.
+Chọn **Bắt đầu → Vào đảo**. Đi bằng WASD và di chuột để xoay camera. Space để nhảy, Shift để lướt, E nạp ánh sáng, Q tỏa sáng. Esc hoặc P tạm dừng. Âm lượng và độ nhạy chuột được lưu trong Cài đặt.
 
-Mỗi đom đóm nhặt được cho 10 điểm, mỗi đèn thắp được cho 100 điểm và mỗi Bóng Mực trúng xung sáng cho 5 điểm. Khi thắng, cộng phần nguyên của số giây còn lại và 25 điểm cho mỗi lửa còn lại. Mép đảo chặn bước chân nên `fall_enabled` bằng `false`.
+| Đêm | Mục tiêu | Đường đi |
+|---|---|---|
+| Đảo Bến · 300 giây | 5 đèn | Nhặt đom đóm ở hai vòng quanh đảo. Đèn đã sáng bảo vệ Mây khỏi Bóng Mực. |
+| Đảo Cau · 330 giây | 6 đèn | Đi qua cầu tre hoặc dùng bục nhảy sang đảo kia. Bùa Gió ở giữa cầu giúp chạy nhanh và lướt liên tiếp. |
+| Đảo Chuông · 360 giây | 7 đèn | Hai dốc dẫn lên tầng giữa; bục tại (0, 3, 13) đưa Mây tới tháp. Canh lá bay và hiệu lệnh gió. |
 
-### Kiểm chứng Phase 1
+Túi mang 10 đom đóm. Mỗi đèn cần 10 và nhớ số đã nạp. Pulse tốn 3 con, làm choáng Bóng Mực và có thể lấy lại đồ Gió Lạc đã cướp. Rơi khỏi đảo làm mất một Ngọn Lửa và toàn bộ túi. Mỗi Đêm bắt đầu với 3 Ngọn Lửa.
 
-Sau bước build, chạy `npm test` để kiểm tra CLI và một lượt thắng từ trạng thái mặc định. Ví dụ sau dựng sẵn bốn đèn sáng rồi nhặt đom đóm cuối để kiểm tra thứ tự event, điểm và điều kiện thắng.
+Mỗi đom đóm **nạp vào đèn** cho 10 điểm, thắp đèn cho 100 điểm, mỗi Bóng Mực trúng pulse cho 5 điểm. Thắng Đêm được cộng thêm hai lần phần nguyên số giây còn lại và 50 điểm mỗi Ngọn Lửa còn lại. Bình Minh tổng kết điểm của ba Đêm thắng.
+
+## Kiểm chứng
+
+Sau khi build, chạy `npm test`. Ví dụ kiểm tra nạp đom đóm cuối cùng hoặc chạy riêng một đảo:
 
 ```sh
 node dist-cli/headless.js --night 1 --seed 7 --ticks 60 --scenario tests/win.json --inputs tests/interact.json --snapshot-every 1 --out win.jsonl
+node dist-cli/headless.js --night 3 --seed 7 --ticks 21600 --out dem-3.jsonl
 ```
 
-Để chạy lại toàn bộ Đêm 1 bằng cùng một lộ trình và đối chiếu kết quả với `evidence/seed-7.jsonl`:
+Để phát lại một lượt thắng từ đầu Đảo Chuông bằng đúng input đã kiểm tra, dùng hai lệnh sau. Có thể thay bằng Đêm 2 và seed 7 cho Đảo Cau.
 
 ```sh
-node tests/night1.mjs route.json
-node dist-cli/headless.js --night 1 --seed 7 --ticks 18000 --inputs route.json --snapshot-every 18000 --out seed-7.jsonl
+node tests/campaign.mjs 3 1 route.json
+node dist-cli/headless.js --night 3 --seed 1 --ticks 21600 --inputs route.json --snapshot-every 21600 --out dem-3-thang.jsonl
 ```
 
-Các giá trị cân bằng nằm trong [game.contract.json](game.contract.json). Xem [bằng chứng](evidence/) và [nhật ký](NHAT-KY.md) để biết những bước đã kiểm tra.
+CLI dừng khi thắng, thua hoặc đủ số tick. Các scenario và điều kiện nghiệm thu dựa trên [Ticket-02](TICKET-02.md), [spec CP2](SPEC-CP2.md) và [contract v1.1](game.contract.json). Xem [kết quả CLI và FPS](evidence/phase2/), [ảnh và video có âm thanh](evidence/cp2-browser/) và [nhật ký](NHAT-KY.md). Tag `phase-1` lưu bản Đêm 1 dùng contract v1.0.
 
-### Sáng tạo của tôi
+## Sáng tạo của tôi
 
-Phase 1 tập trung vào phần lõi. Nón lá của Mây treo đèn nhỏ, thân đảo nổi giữa mây, năm đèn chuyển sang vàng cam và làm cảnh sáng dần. Các chi tiết hiển thị dùng hình khối Three.js.
+Mây đội nón lá có treo đèn nhỏ. Cầu tre, bục nhảy, tháp chuông, Gió Lạc và quần đảo được dựng bằng hình khối Three.js. Nhạc và hiệu ứng được tổng hợp bằng Web Audio trong trình duyệt.
 
 > **Cá nhân** (1 người / 1 MSSV) · Áp dụng SDLC cùng AI để xây một **game 3D** qua **4 phase**, từ yêu cầu ban đầu tới bản phát hành.
 > **Lab board + trợ giảng:** **[Đảo Đèn Lồng Lab](https://claude.ai/artifact/Q1RYyv1dxjUczzCbd2ZnoW)**
