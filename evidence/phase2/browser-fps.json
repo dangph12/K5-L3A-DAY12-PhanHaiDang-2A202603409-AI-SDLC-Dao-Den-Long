@@ -1,0 +1,50 @@
+{
+  "measured_at_utc": "2026-11-20T08:38:15.167Z",
+  "browser": "Microsoft Edge 145.0.3800.65",
+  "os": "Windows 10 Home",
+  "cpu": "Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz",
+  "memory_gib": 23.9,
+  "vendor": "Google Inc. (Intel)",
+  "renderer": "ANGLE (Intel, Intel(R) HD Graphics 630 (0x0000591B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "drawingBuffer": [
+    1280,
+    720
+  ],
+  "build_sha256": "94a0264d3afee64e3d99303acac1ca1c23ee8c397b2fc72e0ff75e8c8e9b5fc9",
+  "method": "Production Vite bundle; Edge headless, viewport 1280x720 DPR 1. An automated next-night menu action selects each island. The normal gameplay loop, HUD and audio run for a 2.2-second warmup and an eight-second camera pan. FPS counts requestAnimationFrame intervals divided by elapsed time. No simulation timers or render callbacks are replaced.",
+  "results": [
+    {
+      "island": "Đêm 1 · Đảo Bến",
+      "clock": [
+        "04:58",
+        "04:50"
+      ],
+      "frames": 479,
+      "elapsed_ms": 8000.9,
+      "fps": 59.87,
+      "p95_frame_ms": 16.8
+    },
+    {
+      "island": "Đêm 2 · Đảo Cau",
+      "clock": [
+        "05:28",
+        "05:20"
+      ],
+      "frames": 480,
+      "elapsed_ms": 8000.8,
+      "fps": 59.99,
+      "p95_frame_ms": 16.8
+    },
+    {
+      "island": "Đêm 3 · Đảo Chuông",
+      "clock": [
+        "05:58",
+        "05:50"
+      ],
+      "frames": 480,
+      "elapsed_ms": 8000.8,
+      "fps": 59.99,
+      "p95_frame_ms": 16.8
+    }
+  ]
+}

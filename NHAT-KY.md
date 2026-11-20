@@ -22,3 +22,13 @@
 - **Âm thanh** — Trò chơi chưa có âm thanh.
 - **Mô hình 3D** — Cần tăng số đa giác (polygon) cho tất cả vật thể để hình khối chi tiết hơn.
 - **Góc nhìn (POV)** — Hiện phải giữ nút chuột trái và kéo để xoay camera. Người chơi muốn xoay góc nhìn bằng cách di chuyển chuột mà không cần giữ nút.
+
+## CP2 · Ba hòn đảo
+
+- **Đầu bài** — Triển khai Ticket-02 trên mốc phase-1. Người chơi chọn xử lý cả phông chữ, điều khiển camera và độ chi tiết mô hình cùng phần âm thanh bắt buộc. Các giả định về điểm xuất phát Đêm 3, điểm sương, TTL và cách kiểm tra nằm trong SPEC-CP2.md.
+- **Nhật ký AI** — Codex tách mô phỏng, bản đồ/renderer, UI/âm thanh và trình chạy CLI; dùng cùng bộ tọa độ và Game cho cả hai chế độ. Đã thêm skill kiểm chứng CP2 và tiêu chí nghiệm thu trước khi thay luật. Phiên không cung cấp dữ liệu tính phí để xác nhận chi phí hoặc tổng token.
+- **Phát hiện và sửa** — Ngưỡng chặn vách cố định có thể chặn lướt trên dốc; đổi sang độ cao cho phép theo quãng đường ngang. Hướng lá báo gió được chọn từ khi bắt đầu cảnh báo và dùng lại lúc gió nổi. Lộ trình thử đầu tiên ở Đảo Cau và Đảo Chuông bị thua: trình điều khiển kiểm thử được sửa để đi đúng cầu, dốc và xử lý nguy hiểm. Giữ nguyên luật chơi khi tìm lộ trình.
+- **Headless** — 8 nhóm hồi quy và 10 nhóm mới đạt. Các lượt chơi mặc định Đêm 1/2/3 thắng lần lượt ở tick 8659/14668/20935 với điểm 1360/1525/1617. Bộ kiểm tra chạy riêng đủ 21600 tick qua CLI trong 0,886 giây trên lần ghi log. Xem evidence/phase2/test-results.txt và ba file night-*.jsonl.
+- **Trình duyệt** — Edge 145, Intel HD Graphics 630, 1280×720: 59,87 / 59,99 / 59,99 FPS trung bình, đo mỗi Đêm trong 8 giây sau khởi động. Bài thử UI kiểm tra lưu cài đặt, di chuột không giữ nút, pause, audio, HUD và tổng điểm. Bài thử UI dùng tình huống gần thắng/thua để chuyển màn; các lượt headless phía trên dùng bản đồ mặc định. Ảnh và video có âm thanh trong evidence/cp2-browser.
+- **Giới hạn** — Chưa có kết quả test ẩn từ giảng viên. FPS trên các thiết bị khác cần đo trên thiết bị đó.
+- **Clone sạch** — Tại commit mã nguồn 7753c22, npm ci, npm run build và npm test đều thành công trên Windows. CLI chạy trọn Đêm 3 trong 1,097 giây ở lần này. Bundle production có SHA-256 94a0264d3afee64e3d99303acac1ca1c23ee8c397b2fc72e0ff75e8c8e9b5fc9, trùng với bản đo FPS. Bài thử trình duyệt cũng phát hiện và kiểm tra lại lỗi nhấn P liên tiếp và dấu tiếng Việt ở tiêu đề.

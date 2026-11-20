@@ -1,0 +1,26 @@
+
+> dao-den-long@0.1.0 test
+> node tests/contract.mjs && node tests/phase2.mjs && node tests/night1.mjs && node tests/campaign.mjs
+
+PASS tick zero, night_start, snapshot interval, end
+PASS camera, diagonal normalization, retained move and jump edge
+PASS capacity, pickup height, deposit distance, nearest/ID tie and edge
+PASS 3D pulse selection, cost, cooldown, progressive push and stun
+PASS recoil, invulnerability, dropped motes and lit safe zone
+PASS win, scoring, setup without scoring and dawn
+PASS deterministic bytes and stable generated IDs
+PASS invalid scenario, inputs and CLI return errors
+PASS three maps, initial contract and spawn schedules
+PASS dash at rest and midair, facing, 12 ticks and cooldown
+PASS pause freezes gameplay, timers, spawn and wind while tick advances
+PASS fall bypasses invulnerability, charges once, respawns after 60 ticks
+PASS bridge, both bamboo launch trajectories and terrace route
+PASS charm pickup, repeated dash edges, expiry, respawn and replacement
+PASS drifter chase, steal before hit, invulnerability and pulse recovery
+PASS night three wind acts for 300 ticks and can be disabled
+PASS terminal precedence on last tick
+BENCH Night 3 886 ms including CLI and JSONL read
+PASS full night three, 21600 ticks in at most 30 s
+PASS default Night 1, seed 7: won at tick 8659, score 1360
+{"night":2,"seed":7,"state":"won","ticks":14668,"score":1525,"lit":6}
+{"night":3,"seed":1,"state":"won","ticks":20935,"score":1617,"lit":7}

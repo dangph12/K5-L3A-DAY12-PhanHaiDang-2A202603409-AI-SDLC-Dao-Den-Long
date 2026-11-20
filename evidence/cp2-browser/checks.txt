@@ -1,0 +1,17 @@
+Edg/145.0.3800.65
+1280x720, Three.js production build, SwiftShader
+PASS volume 48% and mouse sensitivity 1.35 persist after reload.
+PASS Vietnamese island heading uses Cambria.
+PASS click to enter captures pointer. HUD has three flames and ten inventory slots.
+PASS mouse movement with zero buttons rotates yaw.
+PASS Esc pause freezes sim_tick; settings return to pause; Resume restores gameplay.
+PASS P toggles pause and resumes the same night.
+PASS pickup, shade spawn and player hit trigger Web Audio motifs.
+PASS jump, dash and pulse dispatched; pulse entered cooldown.
+PASS countdown cue, danger clock and loss motif.
+PASS dawn-loss fixture opens loss screen; retry starts the same island at full health.
+PASS recorded rendered canvas and Web Audio master output to game-audio.webm.
+PASS wind warning and audio start at 28 seconds of Night 3.
+PASS three last-lantern fixtures progressed via E and Next; dawn total = 948 + 1006 + 1012 = 2966.
+PASS no uncaught browser exceptions during campaign.
+Near-terminal fixtures set in memory via DevTools; normal UI actions triggered results. Screenshots capture actual browser viewport. Video captures WebGL canvas and synthesized game audio.
