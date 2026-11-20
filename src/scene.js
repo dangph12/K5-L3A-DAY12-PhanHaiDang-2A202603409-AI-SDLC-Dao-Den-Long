@@ -258,6 +258,14 @@ export function createView(host){
   scene.add(new T.Points(stars,new T.PointsMaterial({color:colors.core,size:.18,fog:false})))
   const {may,legs}=avatar()
   scene.add(may)
+  const avatarMaterials=[]
+  may.traverse(obj=>{
+    if(!obj.isMesh)return
+    obj.material=obj.material.clone()
+    obj.material.userData.baseColor=obj.material.color.clone()
+    avatarMaterials.push(obj.material)
+  })
+  let tintUntil=-1,tintColor=0xff5a5f
   const shadow=part(scene,new T.CircleGeometry(.58,48),new T.MeshBasicMaterial({
     color:0x132537,transparent:true,opacity:.38,depthWrite:false
   }),[0,.024,0])
@@ -294,6 +302,11 @@ export function createView(host){
       pulseAt=game.sim_tick
       wave.position.set(game.player.pos[0],game.player.pos[1]+.15,game.player.pos[2])
     },
+    impact(game,kind,amount){
+      if(amount<=0 && kind==='stolen')return
+      tintColor=kind==='damage'?0xff5a5f:0xffe58a
+      tintUntil=game.sim_tick+30
+    },
     reset(){pulseAt=-100},
     arrow(game){
       let nearest=null,best=Infinity
@@ -320,6 +333,10 @@ export function createView(host){
         pulseAt=-100
       }
       const [x,y,z]=game.player.pos,a=radians(yaw),ticks=game.sim_tick
+      if(ticks<tintUntil){
+        const strength=.35+.45*Math.abs(Math.sin(ticks*.65))
+        for(const material of avatarMaterials)material.color.lerpColors(material.userData.baseColor??material.color,new T.Color(tintColor),strength)
+      }else for(const material of avatarMaterials)material.color.copy(material.userData.baseColor??material.color)
       may.position.set(x,y,z)
       may.rotation.y=Math.atan2(...game.facing)
       const velocity=game.player.vel

@@ -1,4 +1,4 @@
-# Nhật ký lab Đảo Đèn Lồng
+﻿# Nhật ký lab Đảo Đèn Lồng
 
 ## CP0 · Chuẩn bị
 
@@ -45,3 +45,9 @@ TICKET-03.md thay luật thắng sớm bằng sống tới bình minh, thêm nhi
 - **Test cũ được sửa** — Trong tests/contract.mjs, kỳ vọng đèn sáng không nhận tương tác đổi thành châm dầu; bài thắng all_lit đổi thành dawn_survived; điểm được tính theo lượt nạp và dầu. Trong tests/phase2.mjs, thời lượng ba Đêm, thắng ở tick cuối và phép đo đủ 21600 tick được cập nhật. tests/night1.mjs và tests/campaign.mjs là trình tạo lộ trình thắng sớm theo luật CP2; chúng được giữ trong lịch sử/tag phase-2 và ngừng chạy trong npm test CP3 vì mục tiêu đã thay thế.
 - **Kiểm chứng CP3** — npm run build thành công. npm test đạt 8 nhóm hồi quy contract, 10 nhóm Phase 2 còn hiệu lực và 3 nhóm CP3. Headless Đêm 3 chạy đủ 21600 tick trong dưới 1 giây ở lần đo trong test. Scenario bình minh trong evidence/phase3/dawn-scenario.json thắng ở tick 3, điểm 477. Edge 1280×720 mở bản production, lưu cài đặt màu sau reload và không phát sinh lỗi JavaScript; ảnh trong evidence/phase3/night-1.jpg.
 - **Giới hạn** — Chưa có kết quả test ẩn của giảng viên. Các lượt thắng từ đầu ba Đêm bằng bot của CP2 không còn là phép thử hợp lệ cho luật bình minh mới. Chưa có phép đo FPS CP3 riêng trên mọi đảo.
+
+### Phản hồi CP3 sau phát hành
+
+- **Bunny hop** — Space được đệm trong 6 tick trước khi tiếp đất. Cú nhảy vẫn chỉ bắt đầu khi Mây chạm đất và giữ nguyên vận tốc nhảy chuẩn.
+- **Tổn thất dễ thấy** — Khi Bóng Mực đánh trúng, HUD báo mất Ngọn Lửa và đom đóm rơi. Khi Gió Lạc cướp, HUD báo đúng số lượng; màu và nền nháy phân biệt hai sự kiện.
+- **Tốc độ chạy** — Giữ nguyên số chuẩn theo ticket.

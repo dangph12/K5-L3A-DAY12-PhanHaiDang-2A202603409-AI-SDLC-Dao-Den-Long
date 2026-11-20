@@ -322,6 +322,8 @@ function advance() {
   if(wantJump && game.player.pos[1]>beforeY && game.player.vel[1]>=6.6 && game.player.vel[1]<=7) sound('jump')
   for(const event of game.events) {
     if(event.name==='pulse') view.pulse(game)
+    if(event.name==='player_hit')view.impact(game,'damage',(event.data as {dropped?:number;lost?:number}).lost??(event.data as {dropped?:number}).dropped??0)
+    if(event.name==='drifter_steal')view.impact(game,'stolen',(event.data as {amount:number}).amount)
     sound(event.name)
   }
   if(game.left>0 && Math.ceil(game.left)<seconds && Math.ceil(game.left)<=10) sound('countdown')

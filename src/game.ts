@@ -46,6 +46,7 @@ export class Game {
   private dashDir=[0,1]
   private dashLeft=0
   private glideVelocity=0
+  private jumpBuffer=0
   private launch:Pos|null=null
   private nextMote=1
   private previous=idle()
@@ -166,7 +167,9 @@ export class Game {
     if(length)this.facing=[dx/Math.hypot(dx,dz),dz/Math.hypot(dx,dz)]
     const pad=p.grounded?this.map.pads.find(b=>distance(b.pos,p.pos)<=1 && Math.abs(b.pos[1]-y)<.15):null
     if(pad){this.launch=copy(pad.velocity);p.vel[1]=pad.velocity[1];p.grounded=false}
-    else if(input.jump && !this.previous.jump && p.grounded){p.vel[1]=7;p.grounded=false}
+    if(input.jump && !this.previous.jump)this.jumpBuffer=6
+    else this.jumpBuffer=Math.max(0,this.jumpBuffer-1)
+    if(this.jumpBuffer>0 && p.grounded){p.vel[1]=7;p.grounded=false;this.jumpBuffer=0}
     if(input.dash && !this.previous.dash && !this.dashLeft && (!this.dashCd||this.charmTicks)){
       this.dashDir=[...this.facing];this.dashLeft=Math.round(this.t.dash_duration_s*60)
       this.glideVelocity=p.vel[1]

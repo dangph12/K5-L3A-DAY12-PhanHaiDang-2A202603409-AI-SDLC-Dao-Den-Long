@@ -8,7 +8,7 @@ npm run build
 npm run preview -- --open
 ```
 
-Chọn **Bắt đầu → Vào đảo**. WASD để đi, di chuột để xoay góc nhìn ngang và dọc, Space để nhảy, Shift để lướt, E để nạp đèn hoặc châm dầu, Q để Tỏa Sáng. Esc/P mở tạm dừng. Cài đặt lưu âm lượng, độ nhạy chuột và bảng màu dễ phân biệt.
+Chọn **Bắt đầu → Vào đảo**. WASD để đi, di chuột để xoay góc nhìn ngang và dọc, Space để nhảy; nhấn Space ngay trước khi chạm đất để nối cú nhảy, Shift để lướt, E để nạp đèn hoặc châm dầu, Q để Tỏa Sáng. Esc/P mở tạm dừng. Cài đặt lưu âm lượng, độ nhạy chuột và bảng màu dễ phân biệt.
 
 | Đêm | Thời lượng | Số đèn cần còn sáng lúc bình minh |
 |---|---:|---:|
@@ -18,7 +18,7 @@ Chọn **Bắt đầu → Vào đảo**. WASD để đi, di chuột để xoay g
 
 Đi qua cầu tre hoặc dùng bục nhảy để tới đảo bên kia ở Đảo Cau. Hai dốc và bục tại (0, 3, 13) dẫn lên tầng trên của Đảo Chuông.
 
-Mỗi đèn mới cần 10 đom đóm. Đèn tắt vì cạn dầu cần 5 để thắp lại. Đèn sáng có 100 dầu, hao 1 mỗi giây. Nhấn E khi đứng gần để châm 10 dầu cho mỗi đom đóm đã dùng. Dưới 30 dầu, đèn mất vùng an toàn và Bóng Mực có thể hút dầu. Mỗi lần thắp thành công tăng sức chứa túi thêm 2, từ 10 tới tối đa 20. Mất cả 3 Ngọn Lửa thì thua ngay. Thắp hết đèn sớm vẫn cần giữ đủ đèn sáng tới bình minh.
+Mỗi đèn mới cần 10 đom đóm. Đèn tắt vì cạn dầu cần 5 để thắp lại. Đèn sáng có 100 dầu, hao 1 mỗi giây. Nhấn E khi đứng gần để châm 10 dầu cho mỗi đom đóm đã dùng. Dưới 30 dầu, đèn mất vùng an toàn và Bóng Mực có thể hút dầu. Mỗi lần thắp thành công tăng sức chứa túi thêm 2, từ 10 tới tối đa 20. Mất cả 3 Ngọn Lửa thì thua ngay. Khi bị đánh, Mây lóe viền đỏ; khi mất đom đóm, các đốm sáng bay khỏi Mây. Thắp hết đèn sớm vẫn cần giữ đủ đèn sáng tới bình minh.
 
 Mỗi đom đóm nạp hoặc châm cho 5 điểm. Thắp lần đầu cho 100, thắp lại cho 40. Tỏa Sáng trúng mỗi Bóng Mực cho 5, hoặc 15 nếu nó đang hút dầu. Khi thắng, mỗi đèn còn sáng cho 50 cộng phần nguyên số dầu còn lại; mỗi Ngọn Lửa còn lại cho 50. Tổng điểm Bình Minh cộng ba Đêm đã thắng.
 
